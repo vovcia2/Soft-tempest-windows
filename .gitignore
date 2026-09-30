@@ -1,0 +1,16 @@
+# CMake / build output
+build/
+build-*/
+out/
+CMakeUserPresets.json
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+*.VC.db
+*.VC.opendb
+
+# Misc
+*.log
+Thumbs.db

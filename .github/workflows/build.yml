@@ -1,0 +1,49 @@
+name: Build Windows EXE
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure (CMake, MSVC)
+        run: cmake -S . -B build -G "Visual Studio 17 2022" -A x64
+
+      - name: Build Release
+        run: cmake --build build --config Release
+
+      - name: Upload EXE
+        uses: actions/upload-artifact@v4
+        with:
+          name: soft-tempest-windows
+          path: build/Release/*.exe
+          if-no-files-found: error
+
+  # Cross-check: the same sources also build with MinGW-w64 on Linux
+  # (run-time shader compilation path).
+  build-mingw:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install MinGW-w64
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends mingw-w64 cmake ninja-build
+
+      - name: Configure (CMake, MinGW)
+        run: cmake -S . -B build-mingw -G Ninja -DCMAKE_TOOLCHAIN_FILE=cmake/mingw-w64-x86_64.cmake -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build Release
+        run: cmake --build build-mingw
+
+      - name: Upload EXE (MinGW)
+        uses: actions/upload-artifact@v4
+        with:
+          name: soft-tempest-windows-mingw
+          path: build-mingw/*.exe
+          if-no-files-found: error
