@@ -79,12 +79,23 @@ i nie atakuje. Specyfikacja, na podstawie której powstał projekt, jest w [`SYN
 
 ## Budowanie
 
-### Visual Studio 2022 + CMake (zalecane)
+### Visual Studio + CMake (zalecane)
+
+Generator Visual Studio (2022 lub nowszy):
 
 ```powershell
-cmake -S . -B build -G "Visual Studio 17 2022" -A x64
+cmake -S . -B build -A x64
 cmake --build build --config Release
 # wynik: build\Release\SoftTempest.exe
+```
+
+Albo Ninja z poziomu „Developer PowerShell / Command Prompt for VS” (tak buduje CI,
+bo nie wymaga znajomości wersji Visual Studio):
+
+```powershell
+cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
+cmake --build build
+# wynik: build\SoftTempest.exe
 ```
 
 Shadery HLSL są kompilowane w buildzie przez `fxc` z Windows SDK do nagłówków z bajtkodem
@@ -104,8 +115,10 @@ cmake --build build-mingw
 ### GitHub Actions
 
 `.github/workflows/build.yml` buduje wersję MSVC na `windows-latest` i publikuje
-artefakt `soft-tempest-windows` (`SoftTempest.exe`); dodatkowo buduje wariant MinGW na
-Ubuntu jako kontrolę przenośności źródeł.
+artefakt `soft-tempest-windows` (`SoftTempest.exe`). Job znajduje zainstalowane Visual
+Studio przez `vswhere`, ładuje jego środowisko (`vcvars64.bat`) i buduje Ninją, więc nie
+zależy od konkretnej wersji VS na runnerze. Dodatkowo buduje wariant MinGW na Ubuntu jako
+kontrolę przenośności źródeł.
 
 ## Wymagania
 

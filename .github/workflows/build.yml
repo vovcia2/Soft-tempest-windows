@@ -8,26 +8,46 @@ on:
 
 jobs:
   build:
+    name: MSVC (windows-latest)
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Configure (CMake, MSVC)
-        run: cmake -S . -B build -G "Visual Studio 17 2022" -A x64
+      # Load the developer environment of whatever Visual Studio the runner
+      # ships (2022, 2026, ...). This puts cl.exe, rc.exe and the Windows SDK
+      # (fxc.exe) on PATH, so CMake can use Ninja without knowing the VS version.
+      - name: Set up MSVC developer environment
+        shell: pwsh
+        run: |
+          $vswhere = Join-Path ${env:ProgramFiles(x86)} 'Microsoft Visual Studio\Installer\vswhere.exe'
+          $vsPath = & $vswhere -latest -prerelease -products * `
+            -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
+          if (-not $vsPath) { throw 'No Visual Studio with the C++ toolset found' }
+          Write-Host "Using Visual Studio at $vsPath"
+          $vcvars = Join-Path $vsPath 'VC\Auxiliary\Build\vcvars64.bat'
+          cmd /s /c "`"$vcvars`" > nul 2>&1 && set" | ForEach-Object {
+            if ($_ -match '^([^=]+)=(.*)$') {
+              Add-Content -Path $env:GITHUB_ENV -Value "$($matches[1])=$($matches[2])"
+            }
+          }
+
+      - name: Configure (CMake + Ninja, MSVC)
+        run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
 
       - name: Build Release
-        run: cmake --build build --config Release
+        run: cmake --build build
 
       - name: Upload EXE
         uses: actions/upload-artifact@v4
         with:
           name: soft-tempest-windows
-          path: build/Release/*.exe
+          path: build/*.exe
           if-no-files-found: error
 
   # Cross-check: the same sources also build with MinGW-w64 on Linux
   # (run-time shader compilation path).
   build-mingw:
+    name: MinGW-w64 (ubuntu-latest)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
