@@ -11,7 +11,7 @@ cbuffer NoiseConstants : register(b0)
 {
     float  uTime;        // seconds since start (informational)
     float  uAmplitude;   // 0..1, overlay opacity
-    int    uMode;        // 0 = WHITE, 1 = HFREQ_HORIZONTAL, 2 = TEMPORAL, 3 = WAVES
+    int    uMode;        // 0 = WHITE, 1 = HFREQ_HORIZONTAL, 2 = TEMPORAL, 3 = WAVES, 4 = VSTRIPES
     uint   uSeed;        // fresh random seed every frame
     float2 uResolution;  // render target size in pixels
     uint   uBandSeed;    // fixed for the session: shapes the wave bands of mode 3
@@ -83,6 +83,31 @@ float wavesEnvelope(float2 p, float time, uint bandSeed)
     return w * w;                               // sharper crests, wider troughs
 }
 
+// ---------------------------------------------------------------------------
+// Mode 4 (VSTRIPES): soft vertical stripes. Two overlaid sines along X with
+// session-random spacing, phase and (very slow) drift direction give smooth,
+// slightly irregular vertical bands. Alpha only; noise stays per-frame random.
+// ---------------------------------------------------------------------------
+float stripesEnvelope(float x, float time, uint bandSeed)
+{
+    float r0 = rnd(uint3(1u, bandSeed, 101u));
+    float r1 = rnd(uint3(2u, bandSeed, 103u));
+    float r2 = rnd(uint3(3u, bandSeed, 107u));
+    float r3 = rnd(uint3(4u, bandSeed, 109u));
+    float r4 = rnd(uint3(5u, bandSeed, 113u));
+    float r5 = rnd(uint3(6u, bandSeed, 127u));
+
+    float period1 = lerp(70.0, 130.0, r0);          // px between stripes
+    float period2 = period1 * lerp(1.6, 2.4, r1);    // wider second layer breaks regularity
+    float speed1  = lerp(3.0, 9.0, r2) * ((r4 < 0.5) ? -1.0 : 1.0);   // px/s, random direction
+    float speed2  = lerp(2.0, 6.0, r3) * ((r5 < 0.5) ? 1.0 : -1.0);
+
+    float s1 = sin(kTwoPi * ((x - speed1 * time) / period1 + r4));
+    float s2 = sin(kTwoPi * ((x - speed2 * time) / period2 + r5));
+    float w  = 0.5 + 0.3 * s1 + 0.2 * s2;            // 0..1, smooth
+    return w;
+}
+
 float4 main(float4 pos : SV_Position) : SV_Target
 {
     uint2 pix   = uint2(pos.xy);
@@ -118,6 +143,13 @@ float4 main(float4 pos : SV_Position) : SV_Target
             // horizontal waves (never fully dark, so every pixel keeps noise).
             float w = wavesEnvelope(pos.xy, uTime, uBandSeed);
             a *= 0.12 + 0.88 * w;
+        }
+        else if (uMode == 4)
+        {
+            // VSTRIPES: fresh noise every frame, alpha shaped by soft vertical
+            // stripes that drift sideways very slowly.
+            float w = stripesEnvelope(pos.x, uTime, uBandSeed);
+            a *= 0.25 + 0.75 * w;
         }
     }
 

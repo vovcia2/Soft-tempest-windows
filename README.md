@@ -66,6 +66,7 @@ i nie atakuje. Specyfikacja, na podstawie której powstał projekt, jest w [`SYN
 | `1` HF horizontal | energia w wysokich częstotliwościach **poziomych** (zegar pikseli): pary sąsiednich kolumn dzielą losową wartość ze znakiem przeciwnym, więc sygnał zmienia się co kolumnę |
 | `2` Temporal | biały szum + dodatkowa losowa modulacja alfy per piksel i klatkę |
 | `3` Waves (domyślny) | biały szum losowany co klatkę, którego alfa jest kształtowana przez poziome fale: ekran dzieli się na pasma, każde z własną losową długością fali, fazą i prędkością, dryfujące powoli w losowym kierunku (w lewo lub w prawo), z lekkim falowaniem w pionie |
+| `4` Vertical stripes | biały szum losowany co klatkę z alfą kształtowaną przez miękkie pionowe pasy (dwie nałożone sinusoidy o losowym odstępie), dryfujące bardzo powoli w bok |
 
 ## Sterowanie
 
