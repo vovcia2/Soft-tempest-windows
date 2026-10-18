@@ -58,7 +58,8 @@ private:
         int32_t  mode;
         uint32_t seed;
         float    resolution[2];
-        float    pad[2];
+        uint32_t bandSeed;
+        float    pad;
     };
     static_assert(sizeof(NoiseConstants) == 32, "constant buffer layout must match the HLSL cbuffer");
 
@@ -87,4 +88,5 @@ private:
     LARGE_INTEGER m_qpcFreq    = {};
     LARGE_INTEGER m_qpcStart   = {};
     std::mt19937  m_rng;
+    uint32_t      m_bandSeed   = 0;
 };
