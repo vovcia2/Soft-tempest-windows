@@ -31,6 +31,7 @@ namespace
         IDM_MODE_HFREQ,
         IDM_MODE_TEMPORAL,
         IDM_MODE_WAVES,
+        IDM_MODE_VSTRIPES,
         IDM_AMP_5,
         IDM_AMP_10,
         IDM_AMP_25,
@@ -93,6 +94,7 @@ namespace
         case NoiseMode::HFreqHorizontal: return L"HF horizontal";
         case NoiseMode::Temporal:        return L"temporal";
         case NoiseMode::Waves:           return L"waves";
+        case NoiseMode::VerticalStripes: return L"vertical stripes";
         default:                         return L"white";
         }
     }
@@ -202,11 +204,13 @@ namespace
         AppendMenuW(modeMenu, MF_STRING, IDM_MODE_HFREQ,    L"High-frequency horizontal");
         AppendMenuW(modeMenu, MF_STRING, IDM_MODE_TEMPORAL, L"Temporal (random alpha)");
         AppendMenuW(modeMenu, MF_STRING, IDM_MODE_WAVES,    L"Horizontal waves (drifting)");
+        AppendMenuW(modeMenu, MF_STRING, IDM_MODE_VSTRIPES, L"Soft vertical stripes");
         const UINT modeId = g_app.config.mode == NoiseMode::HFreqHorizontal ? IDM_MODE_HFREQ
                           : g_app.config.mode == NoiseMode::Temporal        ? IDM_MODE_TEMPORAL
                           : g_app.config.mode == NoiseMode::Waves           ? IDM_MODE_WAVES
+                          : g_app.config.mode == NoiseMode::VerticalStripes ? IDM_MODE_VSTRIPES
                           : IDM_MODE_WHITE;
-        CheckMenuRadioItem(modeMenu, IDM_MODE_WHITE, IDM_MODE_WAVES, modeId, MF_BYCOMMAND);
+        CheckMenuRadioItem(modeMenu, IDM_MODE_WHITE, IDM_MODE_VSTRIPES, modeId, MF_BYCOMMAND);
         AppendMenuW(menu, MF_POPUP, reinterpret_cast<UINT_PTR>(modeMenu), L"Mode");
 
         const int currentPercent = AmplitudeToPercent(g_app.config.amplitude);
@@ -255,6 +259,7 @@ namespace
         case IDM_MODE_HFREQ:    g_app.config.mode = NoiseMode::HFreqHorizontal; SaveConfig(); break;
         case IDM_MODE_TEMPORAL: g_app.config.mode = NoiseMode::Temporal;        SaveConfig(); break;
         case IDM_MODE_WAVES:    g_app.config.mode = NoiseMode::Waves;           SaveConfig(); break;
+        case IDM_MODE_VSTRIPES: g_app.config.mode = NoiseMode::VerticalStripes; SaveConfig(); break;
 
         case IDM_SYNC_1: g_app.config.syncInterval = 1; SaveConfig(); break;
         case IDM_SYNC_2: g_app.config.syncInterval = 2; SaveConfig(); break;

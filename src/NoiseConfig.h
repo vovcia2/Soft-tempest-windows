@@ -9,6 +9,7 @@ enum class NoiseMode : int
     HFreqHorizontal = 1,  // energy concentrated at the horizontal pixel-clock frequency
     Temporal        = 2,  // white noise + per-pixel, per-frame random alpha
     Waves           = 3,  // white noise shaped by slowly drifting horizontal waves
+    VerticalStripes = 4,  // white noise shaped by soft, slowly drifting vertical stripes
 };
 
 struct NoiseConfig
