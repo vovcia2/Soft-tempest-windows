@@ -39,6 +39,7 @@ bool Renderer::Initialize(HWND hwnd, UINT width, UINT height, std::wstring* erro
 
     std::random_device rd;
     m_rng.seed(static_cast<uint32_t>(rd()) ^ static_cast<uint32_t>(m_qpcStart.LowPart));
+    m_bandSeed = static_cast<uint32_t>(m_rng());   // wave layout for this session
 
     if (!CreateDevice(error))                   return false;
     if (!CreateSwapChain(width, height, error)) return false;
@@ -283,6 +284,7 @@ void Renderer::RenderFrame(const NoiseConfig& config)
     constants.seed          = static_cast<uint32_t>(m_rng());   // fresh seed => new noise field every frame
     constants.resolution[0] = static_cast<float>(m_width);
     constants.resolution[1] = static_cast<float>(m_height);
+    constants.bandSeed      = m_bandSeed;
 
     D3D11_MAPPED_SUBRESOURCE mapped = {};
     if (SUCCEEDED(m_context->Map(m_constants.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped)))

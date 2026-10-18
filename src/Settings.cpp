@@ -49,7 +49,7 @@ namespace settings
             ReadDword(key, L"AmplitudePercent", static_cast<DWORD>(AmplitudeToPercent(config.amplitude)))));
 
         DWORD mode = ReadDword(key, L"Mode", static_cast<DWORD>(config.mode));
-        if (mode <= static_cast<DWORD>(NoiseMode::Temporal))
+        if (mode <= static_cast<DWORD>(NoiseMode::Waves))
             config.mode = static_cast<NoiseMode>(mode);
 
         DWORD sync = ReadDword(key, L"SyncInterval", static_cast<DWORD>(config.syncInterval));

@@ -8,12 +8,13 @@ enum class NoiseMode : int
     White           = 0,  // independent white noise, uniform alpha
     HFreqHorizontal = 1,  // energy concentrated at the horizontal pixel-clock frequency
     Temporal        = 2,  // white noise + per-pixel, per-frame random alpha
+    Waves           = 3,  // white noise shaped by slowly drifting horizontal waves
 };
 
 struct NoiseConfig
 {
     float     amplitude    = 0.25f;            // overlay opacity 0..1
-    NoiseMode mode         = NoiseMode::White;
+    NoiseMode mode         = NoiseMode::Waves;
     int       syncInterval = 1;                // Present() sync interval: 1 = every vblank, 2 = every 2nd, ...
     bool      running      = true;             // overlay visible and rendering
 };
